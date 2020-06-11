@@ -1,5 +1,6 @@
 const readline = require('readline-sync');
 const VALID_CHOICES = ['rock', 'paper', 'scissors', 'spock', 'lizard'];
+const ROUNDS_TO_WIN = 5;
 
 function prompt(message) {
   console.log(`=> ${message}`);
@@ -60,17 +61,17 @@ function inputToChoice(input) {
   }
 }
 
-function validateYesOrNo(ans) {
-  while (ans[0] !== 'n' && ans[0] !== 'y') {
-    prompt('Please enter y or n.');
-    ans = readline.question().toLowerCase();
+function validateYesOrNo(answer) {
+  while (answer !== 'no' && answer !== 'yes') {
+    prompt('Please enter only yes or no.');
+    answer = readline.question().toLowerCase();
   }
 }
 
 function grandWinner(score1, score2) {
-  if (score1 === 5) {
+  if (score1 === ROUNDS_TO_WIN) {
     prompt('The computer is the grand winner!');
-  } else if (score2 === 5) {
+  } else if (score2 === ROUNDS_TO_WIN) {
     prompt('You are the grand winner!');
   } else {
     prompt('You resigned. The computer wins by default.');
@@ -81,15 +82,15 @@ function randomIndex() {
   return VALID_CHOICES[Math.floor(Math.random() * VALID_CHOICES.length)];
 }
 
-let newMatchAnswer = 'y';
+let newMatchAnswer = 'yes';
 let match = 1;
 let round = 1;
-while (newMatchAnswer[0] !== 'n') {
-  let playAgainAnswer = 'y';
+while (newMatchAnswer !== 'no') {
+  let playAgainAnswer = 'yes';
   round = 1;
   playerScore = 0;
   computerScore = 0;
-  while (playAgainAnswer[0] !== 'n') {
+  while (playAgainAnswer !== 'no') {
     console.clear();
     prompt(`Match: ${match} Round: ${round}`);
     prompt(`Current Score: You: ${playerScore}, Computer: ${computerScore}`);
@@ -111,10 +112,10 @@ while (newMatchAnswer[0] !== 'n') {
 
     updateScore(winner);
 
-    if (playerScore !== 5 && computerScore !== 5) {
+    if (playerScore !== ROUNDS_TO_WIN && computerScore !== ROUNDS_TO_WIN) {
       prompt(winner);
       prompt(`New Score: You: ${playerScore}, Computer: ${computerScore}`);
-      prompt('Do you want to play again? (y/n)');
+      prompt('Do you want to play again? (yes/no)');
       playAgainAnswer = readline.question().toLowerCase();
       validateYesOrNo(playAgainAnswer);
     } else {
@@ -125,7 +126,7 @@ while (newMatchAnswer[0] !== 'n') {
 
   grandWinner(computerScore, playerScore);
   prompt(`Final Score: You: ${playerScore}, Computer: ${computerScore}`);
-  prompt("Would you like to start a new match? (y/n)");
+  prompt("Would you like to start a new match? (yes/no)");
   newMatchAnswer = readline.question().toLowerCase();
   validateYesOrNo(newMatchAnswer);
   match += 1;
