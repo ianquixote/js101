@@ -1,0 +1,25 @@
+// let strings = ['Hello', 'Dennis', 'Whats', 'Up', '?'];
+//
+// function concat(array) {
+//   let string = '';
+//   for (let i = 0; i < array.length; i++) {
+//     string = string + strings[i];
+//   }
+//   console.log(string);
+// }
+//
+// concat(strings);
+
+let ints = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+function everyOther(arr) {
+  let array = [];
+  for (let i = 0; i < arr.length; i ++) {
+    if (i % 2 === 0) {
+      array.push(arr[i]);
+    }
+  }
+  console.log(array);
+}
+
+everyOther(ints);

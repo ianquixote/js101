@@ -1,22 +1,27 @@
 const readline = require('readline-sync');
-const VALID_CHOICES = ['rock', 'paper', 'scissors', 'spock', 'lizard'];
 const ROUNDS_TO_WIN = 5;
+const VALID_CHOICES = ['rock', 'paper', 'scissors', 'spock', 'lizard'];
+const VALID_INPUT = {
+  rock: ['ro', 'roc', 'rock'],
+  paper: ['pa', 'pap', 'paper'],
+  scissors: ['sc', 'sci', 'scissors'],
+  lizard: ['li', 'liz', 'lizard'],
+  spock: ['sp', 'spo', 'spock'],
+};
+const WINNING_COMBOS = {
+  rock:     ['scissors', 'lizard'],
+  paper:    ['rock',     'spock'],
+  scissors: ['paper',    'lizard'],
+  lizard:   ['paper',    'spock'],
+  spock:    ['rock',     'scissors'],
+};
 
 function prompt(message) {
   console.log(`=> ${message}`);
 }
 
 function playerWins(choice, computerChoice) {
-  return (choice === 'rock' && computerChoice === 'scissors') ||
-         (choice === 'rock' && computerChoice === 'lizard') ||
-         (choice === 'paper' && computerChoice === 'rock') ||
-         (choice === 'paper' && computerChoice === 'spock') ||
-         (choice === 'scissors' && computerChoice === 'paper') ||
-         (choice === 'scissors' && computerChoice === 'lizard') ||
-         (choice === 'lizard' && computerChoice === 'paper') ||
-         (choice === 'lizard' && computerChoice === 'spock') ||
-         (choice === 'spock' && computerChoice === 'rock') ||
-         (choice === 'spock' && computerChoice === 'scissors');
+  return WINNING_COMBOS[choice].includes(computerChoice);
 }
 
 function displayWinner(choice, computerChoice) {
@@ -40,25 +45,13 @@ function updateScore(string) {
 }
 
 let choice;
-function inputToChoice(input) {
+function inputToChoice(input, VALID_INPUT) {
   choice = '';
-  switch (input) {
-    case 'r': case 'ro': case 'rock':
-      choice = 'rock';
-      break;
-    case 'p': case 'pa': case 'paper':
-      choice = 'paper';
-      break;
-    case 'sc': case 'scissors':
-      choice = 'scissors';
-      break;
-    case 'sp': case 'spock':
-      choice = 'spock';
-      break;
-    case 'l': case 'li': case 'lizard':
-      choice = 'lizard';
-      break;
-  }
+  Object.keys(VALID_INPUT).forEach((key) => {
+    if (VALID_INPUT[key].includes(input)) {
+      choice = key;
+    }
+  });
 }
 
 function validateYesOrNo(answer) {
@@ -82,6 +75,11 @@ function randomIndex() {
   return VALID_CHOICES[Math.floor(Math.random() * VALID_CHOICES.length)];
 }
 
+function displayStats(match, round, playerScore, computerScore) {
+  prompt(`Match: ${match} Round: ${round}`);
+  prompt(`Current Score: You: ${playerScore}, Computer: ${computerScore}`);
+}
+
 let newMatchAnswer = 'yes';
 let match = 1;
 let round = 1;
@@ -92,16 +90,15 @@ while (newMatchAnswer !== 'no') {
   computerScore = 0;
   while (playAgainAnswer !== 'no') {
     console.clear();
-    prompt(`Match: ${match} Round: ${round}`);
-    prompt(`Current Score: You: ${playerScore}, Computer: ${computerScore}`);
+    displayStats(match, round, playerScore, computerScore);
     prompt(`Choose one: rock, paper, scissors, lizard, or spock.`);
-    prompt('*Type the first 1 or 2 letters or the full name of your choice.*');
-    let input = readline.question();
-    inputToChoice(input);
+    prompt('*Type the first 2 or 3 letters or the full name of your choice.*');
+    let input = readline.question().toLowerCase();
+    inputToChoice(input, VALID_INPUT);
     while (!VALID_CHOICES.includes(choice)) {
       prompt("That's not a valid choice. Choose again.");
       input = readline.question();
-      inputToChoice(input);
+      inputToChoice(input, VALID_INPUT);
     }
 
     let computerChoice = randomIndex();
