@@ -4,6 +4,7 @@ const HUMAN_MARKER = 'X';
 const COMPUTER_MARKER = 'O';
 const MATCH = 3;
 const FIRST_MOVE = 'choose';
+const BEST_INITIAL_SQUARE = 13;
 const WINNING_LINES = [
   ['1', '2', '3', '4'], ['2', '3', '4', '5'],
   ['6', '7', '8', '9'], ['7', '8', '9', '10'],
@@ -27,8 +28,6 @@ function prompt(input) {
 
 function displayBoard(board) {
   console.clear();
-
-  console.log(`You are ${HUMAN_MARKER} and the computer is ${COMPUTER_MARKER}.\nGet 4 in a row to win the game.`);
 
   console.log('');
   console.log('1    |2    |3    |4    |5');
@@ -83,8 +82,8 @@ function computerChoosesSquare(board) {
     board[detectNearVictory(board)] = COMPUTER_MARKER;
   } else if (detectMinorThreat(board)) {
     board[detectMinorThreat(board)] = COMPUTER_MARKER;
-  } else if (board['13'] === INITIAL_MARKER) {
-    board['13'] = COMPUTER_MARKER;
+  } else if (board[BEST_INITIAL_SQUARE] === INITIAL_MARKER) {
+    board[BEST_INITIAL_SQUARE] = COMPUTER_MARKER;
   } else {
     let randomIndex = Math.floor(Math.random() * emptySquares(board).length);
     let square = emptySquares(board)[randomIndex];
@@ -144,7 +143,7 @@ function detectNearVictory(board) {
   return false;
 }
 
-function boardFull(board) {
+function isBoardFull(board) {
   return emptySquares(board).length === 0;
 }
 
@@ -166,7 +165,7 @@ function detectWinner(board) {
   return null;
 }
 
-function someoneWon(board) {
+function isSomeoneWon(board) {
   return !!detectWinner(board);
 }
 
@@ -204,20 +203,18 @@ function alternatePlayer(currentPlayer) {
 }
 
 function chooseFirstPlayer(setting) {
-  let firstPlayer;
+  if (setting === 'player') return 'player';
+  if (setting === 'computer') return 'computer';
+
   if (setting === 'choose') {
     prompt('Choose who goes first: player or computer.');
     while (true) {
-      firstPlayer = readline.question().trim().toLowerCase();
-      if (firstPlayer === 'player' || firstPlayer === 'computer') break;
+      let firstPlay = readline.question().trim().toLowerCase();
+      if (firstPlay === 'player' || firstPlay === 'computer') return firstPlay;
       prompt('That is not a valid option. Choose only player or computer.');
     }
-  } else if (setting === 'player') {
-    firstPlayer = 'player';
-  } else if (setting === 'computer') {
-    firstPlayer = 'computer';
   }
-  return firstPlayer;
+  return null;
 }
 
 function yesOrNo() {
@@ -231,43 +228,56 @@ function yesOrNo() {
   return answer;
 }
 
+function updateScore(board, score) {
+  if (detectWinner(board) === 'You') {
+    score.playerScore += 1;
+  } else if (detectWinner(board) === 'The computer') {
+    score.computerScore += 1;
+  }
+}
+
+function displayScore(score) {
+  prompt(`The score is: Player: ${score.playerScore}, Computer: ${score.computerScore}.`);
+}
+
+function displayMatchWinner(score) {
+  if (score.playerScore === MATCH) {
+    prompt('You win the match!');
+  } else if (score.computerScore === MATCH)  {
+    prompt('The computer wins the match!');
+  }
+}
+
 while (true) {
-  let playerScore = 0;
-  let computerScore = 0;
+  let score = {playerScore: 0, computerScore: 0};
   while (true) {
     let board = initializeBoard();
+    console.clear();
+    prompt(`Welcome to Tic-Tac-Toe 4-In-A-Row!.`);
+    prompt(`You are ${HUMAN_MARKER} and the computer is ${COMPUTER_MARKER}.`);
+    prompt(`Get 4 in a row to win the game.`);
     let currentPlayer = chooseFirstPlayer(FIRST_MOVE);
 
     while (true) {
       displayBoard(board);
       chooseSquare(board, currentPlayer);
       currentPlayer = alternatePlayer(currentPlayer);
-      if (someoneWon(board) || boardFull(board)) break;
+      if (isSomeoneWon(board) || isBoardFull(board)) break;
     }
 
     displayBoard(board);
 
-    if (someoneWon(board)) {
+    if (isSomeoneWon(board)) {
       prompt(`${detectWinner(board)} won!`);
     } else {
       prompt("It's a tie!");
     }
 
-    if (detectWinner(board) === 'You') {
-      playerScore += 1;
-    } else if (detectWinner(board) === 'The computer') {
-      computerScore += 1;
-    }
+    updateScore(board, score);
+    displayScore(score);
+    displayMatchWinner(score);
 
-    prompt(`The score is: Player: ${playerScore}, Computer: ${computerScore}.`);
-
-    if (playerScore === MATCH) {
-      prompt('You win the match!');
-      break;
-    } else if (computerScore === MATCH)  {
-      prompt('The computer wins the match!');
-      break;
-    }
+    if (MATCH === (score.playerScore || score.computerScore)) break;
 
     prompt('Would you like to play again?');
     let answer = yesOrNo();
